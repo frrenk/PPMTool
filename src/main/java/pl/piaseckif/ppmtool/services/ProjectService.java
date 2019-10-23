@@ -40,7 +40,7 @@ public class ProjectService {
     }
 
     public void deleteProjectByIdentifier(String projectIdentifier) {
-        Project project = projectRepository.findByProjectIdentifier(projectIdentifier);
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier.toUpperCase());
         if (project==null) {
             throw new ProjectIdException("Couldn't delete; Project with identifier \'"+ projectIdentifier.toUpperCase()+ "\' not found");
         } else {
