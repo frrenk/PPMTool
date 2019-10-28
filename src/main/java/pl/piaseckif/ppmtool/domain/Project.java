@@ -24,6 +24,7 @@ public class Project {
     private LocalDate start_date;
     private LocalDate end_date;
 
+    @Column(updatable=false)
     private LocalDate created_At;
     private LocalDate updated_At;
 
