@@ -2,26 +2,47 @@ package pl.piaseckif.ppmtool.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.piaseckif.ppmtool.domain.Backlog;
 import pl.piaseckif.ppmtool.domain.Project;
 import pl.piaseckif.ppmtool.exceptions.ProjectIdException;
+import pl.piaseckif.ppmtool.repositories.BacklogRepository;
 import pl.piaseckif.ppmtool.repositories.ProjectRepository;
+import pl.piaseckif.ppmtool.repositories.ProjectTaskRepository;
 
 @Service
 public class ProjectService {
 
     private ProjectRepository projectRepository;
+    private BacklogRepository backlogRepository;
+    private ProjectTaskRepository projectTaskRepository;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository) {
+    public ProjectService(ProjectRepository projectRepository, BacklogRepository backlogRepository, ProjectTaskRepository projectTaskRepository) {
         this.projectRepository = projectRepository;
+        this.backlogRepository = backlogRepository;
+        this.projectTaskRepository = projectTaskRepository;
     }
 
+
+
+
     public Project saveOrUpdateProject(Project project) {
+
+        String projectIdentifier = project.getProjectIdentifier().toUpperCase();
+
         try {
-            project.setProjectIdentifier(project.getProjectIdentifier().toUpperCase());
+            project.setProjectIdentifier(projectIdentifier);
+            if (project.getId()==null) {
+                Backlog backlog = new Backlog();
+                project.setBacklog(backlog);
+                backlog.setProject(project);
+                backlog.setProjectIdentifier(projectIdentifier);
+            } else {
+                project.setBacklog(backlogRepository.findByProjectIdentifier(projectIdentifier));
+            }
             return projectRepository.save(project);
         } catch (Exception e) {
-            throw new ProjectIdException("Project Id "+project.getProjectIdentifier().toUpperCase()+" already exists!");
+            throw new ProjectIdException("Project Id "+projectIdentifier+" already exists!");
         }
     }
 

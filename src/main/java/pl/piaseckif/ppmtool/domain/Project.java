@@ -21,6 +21,9 @@ public class Project {
     @NotBlank(message = "Project description is required")
     private String description;
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "project")
+    private Backlog backlog;
+
     private LocalDate start_date;
     private LocalDate end_date;
 
@@ -71,6 +74,14 @@ public class Project {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Backlog getBacklog() {
+        return backlog;
+    }
+
+    public void setBacklog(Backlog backlog) {
+        this.backlog = backlog;
     }
 
     public LocalDate getStart_date() {

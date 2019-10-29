@@ -1,5 +1,7 @@
 package pl.piaseckif.ppmtool.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
@@ -11,11 +13,12 @@ public class Backlog {
     private Integer PTSequence = 0;
     private String projectIdentifier;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="project_id", nullable = false)
+    @JsonIgnore
     private Project project;
 
-    @OneToMany
-    private ProjectTask projectTask;
+
 
     public Backlog() {
 
@@ -51,24 +54,5 @@ public class Backlog {
 
     public void setProject(Project project) {
         this.project = project;
-    }
-
-    public ProjectTask getProjectTask() {
-        return projectTask;
-    }
-
-    public void setProjectTask(ProjectTask projectTask) {
-        this.projectTask = projectTask;
-    }
-
-    @Override
-    public String toString() {
-        return "Backlog{" +
-                "id=" + id +
-                ", PTSequence=" + PTSequence +
-                ", projectIdentifier='" + projectIdentifier + '\'' +
-                ", project=" + project +
-                ", projectTask=" + projectTask +
-                '}';
     }
 }

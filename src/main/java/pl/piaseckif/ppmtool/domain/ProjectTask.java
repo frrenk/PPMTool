@@ -19,8 +19,8 @@ public class ProjectTask {
     private Integer priority;
     private LocalDate dueDate;
 
-    @ManyToOne
-    private Backlog backlog;
+//    @ManyToOne
+//    private Backlog backlog;
 
     private String projectIdentifier;
 
@@ -99,13 +99,13 @@ public class ProjectTask {
         this.dueDate = dueDate;
     }
 
-    public Backlog getBacklog() {
-        return backlog;
-    }
-
-    public void setBacklog(Backlog backlog) {
-        this.backlog = backlog;
-    }
+//    public Backlog getBacklog() {
+//        return backlog;
+//    }
+//
+//    public void setBacklog(Backlog backlog) {
+//        this.backlog = backlog;
+//    }
 
     public String getProjectIdentifier() {
         return projectIdentifier;
@@ -141,7 +141,7 @@ public class ProjectTask {
                 ", status='" + status + '\'' +
                 ", priority=" + priority +
                 ", dueDate=" + dueDate +
-                ", backlog=" + backlog +
+//                ", backlog=" + backlog +
                 ", projectIdentifier='" + projectIdentifier + '\'' +
                 ", created_At=" + created_At +
                 ", updated_At=" + updated_At +
