@@ -1,5 +1,7 @@
 package pl.piaseckif.ppmtool.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
@@ -15,12 +17,15 @@ public class ProjectTask {
     @NotBlank(message = "Please include project summary")
     private String summary;
     private String acceptanceCriteria;
+    //TODO change status from string to enum
     private String status;
     private Integer priority;
     private LocalDate dueDate;
 
-//    @ManyToOne
-//    private Backlog backlog;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @JoinColumn(name = "backlog_id", updatable = false, nullable = false)
+    @JsonIgnore
+    private Backlog backlog;
 
     private String projectIdentifier;
 
@@ -99,13 +104,13 @@ public class ProjectTask {
         this.dueDate = dueDate;
     }
 
-//    public Backlog getBacklog() {
-//        return backlog;
-//    }
-//
-//    public void setBacklog(Backlog backlog) {
-//        this.backlog = backlog;
-//    }
+    public Backlog getBacklog() {
+        return backlog;
+    }
+
+    public void setBacklog(Backlog backlog) {
+        this.backlog = backlog;
+    }
 
     public String getProjectIdentifier() {
         return projectIdentifier;
@@ -141,7 +146,7 @@ public class ProjectTask {
                 ", status='" + status + '\'' +
                 ", priority=" + priority +
                 ", dueDate=" + dueDate +
-//                ", backlog=" + backlog +
+                ", backlog=" + backlog +
                 ", projectIdentifier='" + projectIdentifier + '\'' +
                 ", created_At=" + created_At +
                 ", updated_At=" + updated_At +
