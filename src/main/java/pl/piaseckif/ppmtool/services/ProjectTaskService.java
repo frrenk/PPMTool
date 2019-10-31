@@ -3,10 +3,12 @@ package pl.piaseckif.ppmtool.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.piaseckif.ppmtool.domain.Backlog;
+import pl.piaseckif.ppmtool.domain.Project;
 import pl.piaseckif.ppmtool.domain.ProjectTask;
 import pl.piaseckif.ppmtool.exceptions.ProjectIdException;
 import pl.piaseckif.ppmtool.exceptions.ProjectNotFoundException;
 import pl.piaseckif.ppmtool.repositories.BacklogRepository;
+import pl.piaseckif.ppmtool.repositories.ProjectRepository;
 import pl.piaseckif.ppmtool.repositories.ProjectTaskRepository;
 
 import java.util.List;
@@ -16,11 +18,13 @@ public class ProjectTaskService {
 
     private BacklogRepository backlogRepository;
     private ProjectTaskRepository projectTaskRepository;
+    private ProjectRepository projectRepository;
 
     @Autowired
-    public ProjectTaskService(BacklogRepository backlogRepository, ProjectTaskRepository projectTaskRepository) {
+    public ProjectTaskService(BacklogRepository backlogRepository, ProjectTaskRepository projectTaskRepository, ProjectRepository projectRepository) {
         this.backlogRepository = backlogRepository;
         this.projectTaskRepository = projectTaskRepository;
+        this.projectRepository = projectRepository;
     }
 
     public ProjectTask addProjectTask(String projectIdentifier, ProjectTask projectTask) {
@@ -48,11 +52,39 @@ public class ProjectTaskService {
     }
 
     public Iterable<ProjectTask> findBacklogById(String backlogId) {
-        Iterable<ProjectTask> projectTasks = projectTaskRepository.findByProjectIdentifierOrderByPriority(backlogId)
+        Project project = projectRepository.findByProjectIdentifier(backlogId);
 
-        if () {
-            return projectTasks;
+        if (project==null) {
+            throw new ProjectNotFoundException("Project Id "+backlogId+" not found");
         } else {
+            return projectTaskRepository.findByProjectIdentifierOrderByPriority(backlogId);
+        }
+    }
+
+    public ProjectTask findProjectTaskByProjectSequence(String backlogId, String projectSequence) {
+        return validateProjectTask(backlogId, projectSequence);
+    }
+
+    public ProjectTask updateByProjectSequence(ProjectTask updatedTask, String backlogId, String projectSequence){
+        validateProjectTask(backlogId, projectSequence);
+        return projectTaskRepository.save(updatedTask);
+    }
+
+    public void deleteProjectTaskByProjectSequence(String backlogId, String projectSequence) {
+        projectTaskRepository.delete(validateProjectTask(backlogId, projectSequence));
+    }
+
+    public ProjectTask validateProjectTask(String backlogId, String projectSequence) {
+        ProjectTask projectTask = projectTaskRepository.findByProjectSequence(projectSequence);
+        Backlog backlog = backlogRepository.findByProjectIdentifier(backlogId);
+        if (backlog == null) {
+            throw new ProjectNotFoundException("Project Id "+backlogId+" not found");
+        } else if (projectTask==null) {
+            throw new ProjectNotFoundException("Projec Task Id "+projectSequence+" not found");
+        } else if (!backlogId.toUpperCase().equals(projectTask.getProjectIdentifier().toUpperCase())) {
+            throw new ProjectNotFoundException("Project Task doesn't belong to this project");
+        } else {
+            return projectTask;
         }
     }
 }

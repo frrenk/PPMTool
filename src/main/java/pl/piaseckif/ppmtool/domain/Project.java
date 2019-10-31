@@ -6,7 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 public class Project {
@@ -31,17 +31,17 @@ public class Project {
     private LocalDate end_date;
 
     @Column(updatable=false)
-    private LocalDate created_At;
-    private LocalDate updated_At;
+    private LocalDateTime created_At;
+    private LocalDateTime updated_At;
 
     @PrePersist
     protected void onCreate() {
-        this.created_At = LocalDate.now();
+        this.created_At = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updated_At = LocalDate.now();
+        this.updated_At = LocalDateTime.now();
     }
 
     public Project() {
@@ -103,19 +103,19 @@ public class Project {
         this.end_date = end_date;
     }
 
-    public LocalDate getCreated_At() {
+    public LocalDateTime getCreated_At() {
         return created_At;
     }
 
-    public void setCreated_At(LocalDate created_At) {
+    public void setCreated_At(LocalDateTime created_At) {
         this.created_At = created_At;
     }
 
-    public LocalDate getUpdated_At() {
+    public LocalDateTime getUpdated_At() {
         return updated_At;
     }
 
-    public void setUpdated_At(LocalDate updated_At) {
+    public void setUpdated_At(LocalDateTime updated_At) {
         this.updated_At = updated_At;
     }
 }
