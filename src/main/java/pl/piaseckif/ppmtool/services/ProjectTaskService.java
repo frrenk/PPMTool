@@ -19,18 +19,19 @@ public class ProjectTaskService {
     private BacklogRepository backlogRepository;
     private ProjectTaskRepository projectTaskRepository;
     private ProjectRepository projectRepository;
+    private ProjectService projectService;
 
     @Autowired
-    public ProjectTaskService(BacklogRepository backlogRepository, ProjectTaskRepository projectTaskRepository, ProjectRepository projectRepository) {
+    public ProjectTaskService(BacklogRepository backlogRepository, ProjectTaskRepository projectTaskRepository, ProjectRepository projectRepository, ProjectService projectService) {
         this.backlogRepository = backlogRepository;
         this.projectTaskRepository = projectTaskRepository;
         this.projectRepository = projectRepository;
+        this.projectService = projectService;
     }
 
-    public ProjectTask addProjectTask(String projectIdentifier, ProjectTask projectTask) {
+    public ProjectTask addProjectTask(String projectIdentifier, ProjectTask projectTask, String username) {
 
-        try {
-            Backlog backlog = backlogRepository.findByProjectIdentifier(projectIdentifier);
+            Backlog backlog = getBacklogWithUserValidation(projectIdentifier, username);
             projectTask.setBacklog(backlog);
 
             Integer backlogSequence = backlog.getPTSequence();
@@ -45,14 +46,10 @@ public class ProjectTaskService {
                 projectTask.setStatus(("TO_DO"));
             }
             return projectTaskRepository.save(projectTask);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ProjectNotFoundException("Project Id "+projectIdentifier+" not found");
-        }
     }
 
-    public Iterable<ProjectTask> findBacklogById(String backlogId) {
-        Project project = projectRepository.findByProjectIdentifier(backlogId);
+    public Iterable<ProjectTask> findBacklogById(String backlogId, String username) {
+        Project project = projectService.findProjectByIdentifier(backlogId, username);
 
         if (project==null) {
             throw new ProjectNotFoundException("Project Id "+backlogId+" not found");
@@ -61,22 +58,22 @@ public class ProjectTaskService {
         }
     }
 
-    public ProjectTask findProjectTaskByProjectSequence(String backlogId, String projectSequence) {
-        return validateProjectTask(backlogId, projectSequence);
+    public ProjectTask findProjectTaskByProjectSequence(String backlogId, String projectSequence, String username) {
+        return validateProjectTask(backlogId, projectSequence, username);
     }
 
-    public ProjectTask updateByProjectSequence(ProjectTask updatedTask, String backlogId, String projectSequence){
-        validateProjectTask(backlogId, projectSequence);
+    public ProjectTask updateByProjectSequence(ProjectTask updatedTask, String backlogId, String projectSequence, String username){
+        validateProjectTask(backlogId, projectSequence, username);
         return projectTaskRepository.save(updatedTask);
     }
 
-    public void deleteProjectTaskByProjectSequence(String backlogId, String projectSequence) {
-        projectTaskRepository.delete(validateProjectTask(backlogId, projectSequence));
+    public void deleteProjectTaskByProjectSequence(String backlogId, String projectSequence, String username) {
+        projectTaskRepository.delete(validateProjectTask(backlogId, projectSequence, username));
     }
 
-    public ProjectTask validateProjectTask(String backlogId, String projectSequence) {
+    public ProjectTask validateProjectTask(String backlogId, String projectSequence, String username) {
+        Backlog backlog = getBacklogWithUserValidation(backlogId, username);
         ProjectTask projectTask = projectTaskRepository.findByProjectSequence(projectSequence);
-        Backlog backlog = backlogRepository.findByProjectIdentifier(backlogId);
         if (backlog == null) {
             throw new ProjectNotFoundException("Project Id "+backlogId+" not found");
         } else if (projectTask==null) {
@@ -86,5 +83,9 @@ public class ProjectTaskService {
         } else {
             return projectTask;
         }
+    }
+
+    public Backlog getBacklogWithUserValidation(String projectIdentifier, String username) {
+        return projectService.findProjectByIdentifier(projectIdentifier, username).getBacklog();
     }
 }

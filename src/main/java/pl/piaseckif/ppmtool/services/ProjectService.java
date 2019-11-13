@@ -6,6 +6,7 @@ import pl.piaseckif.ppmtool.domain.Backlog;
 import pl.piaseckif.ppmtool.domain.Project;
 import pl.piaseckif.ppmtool.domain.User;
 import pl.piaseckif.ppmtool.exceptions.ProjectIdException;
+import pl.piaseckif.ppmtool.exceptions.ProjectNotFoundException;
 import pl.piaseckif.ppmtool.repositories.BacklogRepository;
 import pl.piaseckif.ppmtool.repositories.ProjectRepository;
 import pl.piaseckif.ppmtool.repositories.ProjectTaskRepository;
@@ -31,9 +32,16 @@ public class ProjectService {
 
 
     public Project saveOrUpdateProject(Project project, String username) {
-
+        if (project.getId()!=null) {
+            Project existingProject = projectRepository.findByProjectIdentifier(project.getProjectIdentifier());
+            if (!checkIfProjectIsNull(existingProject) && !checkIfProjectBelongsToTheUser(existingProject, username)) {
+                throw new ProjectIdException("You are not the owner of this project");
+            }
+        }
+        if (!projectRepository.findById(project.getId()).isPresent()) {
+            throw new ProjectNotFoundException("Wrong ID");
+        }
         String projectIdentifier = project.getProjectIdentifier().toUpperCase();
-
         try {
             User user = userRepository.findByUsername(username);
             project.setUser(user);
@@ -53,27 +61,43 @@ public class ProjectService {
         }
     }
 
-    public Project findProjectByIdentifier(String projectIdentifier) {
+    public Project findProjectByIdentifier(String projectIdentifier, String username) {
         Project project = projectRepository.findByProjectIdentifier(projectIdentifier.toUpperCase());
-        if (project==null) {
-            throw new ProjectIdException("Project with identifier \'"+ projectIdentifier.toUpperCase()+ "\' not found");
+        if (checkIfProjectIsNull(project)) {
+            throw new ProjectIdException("Project with identifier \'" + projectIdentifier.toUpperCase() + "\' not found");
+        }
+        if (!checkIfProjectBelongsToTheUser(project, username)){
+            throw new ProjectIdException("You are not the owner of this project");
         } else {
             return project;
         }
 
     }
 
-    public Iterable<Project> findAllProjects(){
-        return projectRepository.findAll();
+    public Iterable<Project> findAllProjects(String username){
+        return projectRepository.findAllByProjectLeader(username);
     }
 
-    public void deleteProjectByIdentifier(String projectIdentifier) {
-        Project project = projectRepository.findByProjectIdentifier(projectIdentifier.toUpperCase());
-        if (project==null) {
-            throw new ProjectIdException("Couldn't delete; Project with identifier \'"+ projectIdentifier.toUpperCase()+ "\' not found");
-        } else {
-           projectRepository.delete(project);
-        }
+    public void deleteProjectByIdentifier(String projectIdentifier, String username) {
+           projectRepository.delete(findProjectByIdentifier(projectIdentifier, username));
 
+
+    }
+
+    public boolean checkIfProjectBelongsToTheUser(Project project, String username) {
+        System.out.println(project.getUser().getUsername());
+        if (project.getUser().getUsername().equals(username)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean checkIfProjectIsNull(Project project) {
+        if (project==null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
