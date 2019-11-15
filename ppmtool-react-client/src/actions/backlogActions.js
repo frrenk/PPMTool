@@ -1,5 +1,10 @@
 import axios from "axios";
-import { GET_ERRORS, GET_BACKLOG, GET_PROJECT_TASK, DELETE_PROJECT_TASK } from "./types";
+import {
+  GET_ERRORS,
+  GET_BACKLOG,
+  GET_PROJECT_TASK,
+  DELETE_PROJECT_TASK
+} from "./types";
 
 export const addProjectTask = (
   backlog_id,
@@ -49,10 +54,10 @@ export const getProjectTask = (
     });
   } catch (error) {
     history.push("/dashboard");
-    // dispatch({
-    //   type: GET_ERRORS,
-    //   payload: error.response.data
-    // });
+    dispatch({
+      type: GET_ERRORS,
+      payload: error.response.data
+    });
   }
 };
 
@@ -85,4 +90,4 @@ export const deleteProjectTask = (backlog_id, pt_id) => async dispatch => {
       payload: pt_id
     });
   }
-}
+};

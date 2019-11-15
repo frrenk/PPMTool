@@ -39,6 +39,12 @@ class ProjectBoard extends Component {
               {errors.projectNotFound}
             </div>
           );
+        } else if (errors.projectIdentifier) {
+          return (
+            <div className="alert alert-danger text-center" role="alert">
+              {errors.projectIdentifier}
+            </div>
+          );
         } else {
           return (
             <div className="alert alert-danger text-center" role="alert">
@@ -77,7 +83,4 @@ const mapStateToProps = state => ({
   errors: state.errors
 });
 
-export default connect(
-  mapStateToProps,
-  { getBacklog }
-)(ProjectBoard);
+export default connect(mapStateToProps, { getBacklog })(ProjectBoard);

@@ -19,7 +19,7 @@ export const createNewUser = (newUser, history) => async dispatch => {
   }
 };
 
-export const login = LoginRequest => async dispatch => {
+export const login = (LoginRequest, history) => async dispatch => {
   try {
     const res = await axios.post("/api/users/login", LoginRequest);
     const { token } = res.data;
@@ -27,9 +27,14 @@ export const login = LoginRequest => async dispatch => {
 
     setJwtToken(token);
     const decoded = jwt_decode(token);
+    history.push("/dashboard");
     dispatch({
       type: SET_CURRENT_USER,
       payload: decoded
+    });
+    dispatch({
+      type: GET_ERRORS,
+      payload: {}
     });
   } catch (error) {
     dispatch({
@@ -37,4 +42,13 @@ export const login = LoginRequest => async dispatch => {
       payload: error.response.data
     });
   }
+};
+
+export const logout = () => dispatch => {
+  localStorage.removeItem("jwtToken");
+  setJwtToken(false);
+  dispatch({
+    type: SET_CURRENT_USER,
+    payload: {}
+  });
 };
